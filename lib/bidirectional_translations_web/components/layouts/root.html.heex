@@ -31,26 +31,25 @@
     </script>
   </head>
   <body>
-    <ul class="menu menu-horizontal w-full relative z-10 flex items-center gap-4 px-4 sm:px-6 lg:px-8 justify-end">
-      <%= if @current_scope do %>
-        <li>
-          {@current_scope.user.email}
-        </li>
-        <li>
-          <.link href={~p"/users/settings"}>Settings</.link>
-        </li>
-        <li>
-          <.link href={~p"/users/log-out"} method="delete">Log out</.link>
-        </li>
-      <% else %>
-        <li>
-          <.link href={~p"/users/register"}>Register</.link>
-        </li>
-        <li>
-          <.link href={~p"/users/log-in"}>Log in</.link>
-        </li>
-      <% end %>
-    </ul>
+    <nav class="navbar px-4 sm:px-6 lg:px-8 border-b border-base-300">
+      <div class="flex-1 flex items-center gap-6">
+        <a href="/" class="text-lg font-bold tracking-tight">BiTranslate</a>
+        <%= if @current_scope do %>
+          <.link href={~p"/dashboard"} class="btn btn-ghost btn-sm">Dashboard</.link>
+          <.link href={~p"/articles"} class="btn btn-ghost btn-sm">Articles</.link>
+        <% end %>
+      </div>
+      <div class="flex items-center gap-2">
+        <%= if @current_scope do %>
+          <span class="text-sm text-base-content/60 hidden sm:inline">{@current_scope.user.email}</span>
+          <.link href={~p"/users/settings"} class="btn btn-ghost btn-sm">Settings</.link>
+          <.link href={~p"/users/log-out"} method="delete" class="btn btn-ghost btn-sm">Log out</.link>
+        <% else %>
+          <.link href={~p"/users/register"} class="btn btn-ghost btn-sm">Register</.link>
+          <.link href={~p"/users/log-in"} class="btn btn-primary btn-sm">Log in</.link>
+        <% end %>
+      </div>
+    </nav>
     {@inner_content}
   </body>
 </html>

@@ -54,6 +54,13 @@ defmodule BidirectionalTranslationsWeb.Router do
       on_mount: [{BidirectionalTranslationsWeb.UserAuth, :require_authenticated}] do
       live "/users/settings", UserLive.Settings, :edit
       live "/users/settings/confirm-email/:token", UserLive.Settings, :confirm_email
+
+      live "/dashboard", DashboardLive, :index
+      live "/articles", ArticleLive.Index, :index
+      live "/articles/new", ArticleLive.Form, :new
+      live "/articles/:id/edit", ArticleLive.Form, :edit
+      live "/articles/:id", ArticleLive.Show, :show
+      live "/sessions/:id/practice", SessionLive.Practice, :show
     end
 
     post "/users/update-password", UserSessionController, :update_password
