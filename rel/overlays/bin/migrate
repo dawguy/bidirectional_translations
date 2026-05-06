@@ -1,0 +1,5 @@
+#!/bin/sh
+set -eu
+
+cd -P -- "$(dirname -- "$0")"
+exec ./bidirectional_translations eval BidirectionalTranslations.Release.migrate

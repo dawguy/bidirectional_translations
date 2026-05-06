@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: bidirectional-translations
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /
+    envVars:
+      - key: PHX_SERVER
+        value: "true"
+      - key: SECRET_KEY_BASE
+        generateValue: true
+      - key: PHX_HOST
+        sync: false  # Set this to your Render service URL after first deploy, e.g. bidirectional-translations.onrender.com
+      - key: DATABASE_URL
+        fromDatabase:
+          name: bidirectional-translations-db
+          property: connectionString
+      - key: POOL_SIZE
+        value: "2"
+    preDeployCommand: "/app/bin/migrate"
+
+databases:
+  - name: bidirectional-translations-db
+    plan: free
+    databaseName: bidirectional_translations
+    user: bidirectional_translations
