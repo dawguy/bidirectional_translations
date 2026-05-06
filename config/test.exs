@@ -9,9 +9,10 @@ config :bcrypt_elixir, :log_rounds, 1
 # to provide built-in test partitioning in CI environment.
 # Run `mix help test` for more information.
 config :bidirectional_translations, BidirectionalTranslations.Repo,
-  username: "postgres",
-  password: "postgres",
+  username: "wikipedia",
+  password: "wikipedia",
   hostname: "localhost",
+  port: 5435,
   database: "bidirectional_translations_test#{System.get_env("MIX_TEST_PARTITION")}",
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: System.schedulers_online() * 2
