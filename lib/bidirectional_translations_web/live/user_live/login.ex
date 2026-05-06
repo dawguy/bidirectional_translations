@@ -6,92 +6,91 @@ defmodule BidirectionalTranslationsWeb.UserLive.Login do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash} current_scope={@current_scope}>
-      <div class="mx-auto max-w-sm space-y-4">
+    <div class="flex min-h-[calc(100vh-65px)] items-center justify-center px-4 py-12">
+      <div class="w-full max-w-sm space-y-6">
         <div class="text-center">
-          <.header>
-            <p>Log in</p>
-            <:subtitle>
-              <%= if @current_scope do %>
-                You need to reauthenticate to perform sensitive actions on your account.
-              <% else %>
-                Don't have an account? <.link
-                  navigate={~p"/users/register"}
-                  class="font-semibold text-brand hover:underline"
-                  phx-no-format
-                >Sign up</.link> for an account now.
-              <% end %>
-            </:subtitle>
-          </.header>
+          <h1 class="text-2xl font-bold tracking-tight">
+            {if @current_scope, do: "Verify your identity", else: "Sign in"}
+          </h1>
+          <p class="mt-1 text-sm text-base-content/60">
+            {if @current_scope,
+              do: "Re-authenticate to continue.",
+              else: "Welcome back. Enter your details below."}
+          </p>
         </div>
 
-        <div :if={local_mail_adapter?()} class="alert alert-info">
-          <.icon name="hero-information-circle" class="size-6 shrink-0" />
-          <div>
-            <p>You are running the local mail adapter.</p>
-            <p>
-              To see sent emails, visit <.link href="/dev/mailbox" class="underline">the mailbox page</.link>.
-            </p>
+        <div :if={local_mail_adapter?()} class="alert alert-info py-2 text-sm">
+          <.icon name="hero-information-circle" class="size-4 shrink-0" />
+          <span>
+            Local mail adapter active —
+            <.link href="/dev/mailbox" class="underline">view mailbox</.link>.
+          </span>
+        </div>
+
+        <div class="card bg-base-100 border border-base-300 shadow-sm">
+          <div class="card-body gap-4 p-6">
+            <.form
+              :let={f}
+              for={@form}
+              id="login_form_password"
+              action={~p"/users/log-in"}
+              phx-submit="submit_password"
+              phx-trigger-action={@trigger_submit}
+            >
+              <.input
+                readonly={!!@current_scope}
+                field={f[:email]}
+                type="email"
+                label="Email"
+                autocomplete="username"
+                spellcheck="false"
+                required
+                phx-mounted={JS.focus()}
+              />
+              <.input
+                field={@form[:password]}
+                type="password"
+                label="Password"
+                autocomplete="current-password"
+                spellcheck="false"
+              />
+              <.input field={@form[:remember_me]} type="checkbox" label="Stay signed in" />
+              <.button class="btn btn-primary w-full mt-1">
+                Sign in
+              </.button>
+            </.form>
+
+            <div class="divider my-0 text-xs text-base-content/40">or</div>
+
+            <.form
+              :let={f}
+              for={@form}
+              id="login_form_magic"
+              action={~p"/users/log-in"}
+              phx-submit="submit_magic"
+            >
+              <.input
+                readonly={!!@current_scope}
+                field={f[:email]}
+                type="email"
+                label="Email"
+                autocomplete="username"
+                spellcheck="false"
+                required
+              />
+              <.button class="btn btn-ghost btn-sm w-full mt-2">
+                Send magic link
+              </.button>
+            </.form>
           </div>
         </div>
 
-        <.form
-          :let={f}
-          for={@form}
-          id="login_form_magic"
-          action={~p"/users/log-in"}
-          phx-submit="submit_magic"
-        >
-          <.input
-            readonly={!!@current_scope}
-            field={f[:email]}
-            type="email"
-            label="Email"
-            autocomplete="username"
-            spellcheck="false"
-            required
-            phx-mounted={JS.focus()}
-          />
-          <.button class="btn btn-primary w-full">
-            Log in with email <span aria-hidden="true">→</span>
-          </.button>
-        </.form>
-
-        <div class="divider">or</div>
-
-        <.form
-          :let={f}
-          for={@form}
-          id="login_form_password"
-          action={~p"/users/log-in"}
-          phx-submit="submit_password"
-          phx-trigger-action={@trigger_submit}
-        >
-          <.input
-            readonly={!!@current_scope}
-            field={f[:email]}
-            type="email"
-            label="Email"
-            autocomplete="username"
-            spellcheck="false"
-            required
-          />
-          <.input
-            field={@form[:password]}
-            type="password"
-            label="Password"
-            autocomplete="current-password"
-            spellcheck="false"
-          />
-          <.button class="btn btn-primary w-full" name={@form[:remember_me].name} value="true">
-            Log in and stay logged in <span aria-hidden="true">→</span>
-          </.button>
-          <.button class="btn btn-primary btn-soft w-full mt-2">
-            Log in only this time
-          </.button>
-        </.form>
+        <p :if={!@current_scope} class="text-center text-sm text-base-content/60">
+          Don't have an account?
+          <.link navigate={~p"/users/register"} class="link font-medium">Sign up</.link>
+        </p>
       </div>
-    </Layouts.app>
+    </div>
     """
   end
 
@@ -119,16 +118,17 @@ defmodule BidirectionalTranslationsWeb.UserLive.Login do
       )
     end
 
-    info =
-      "If your email is in our system, you will receive instructions for logging in shortly."
-
     {:noreply,
      socket
-     |> put_flash(:info, info)
+     |> put_flash(
+       :info,
+       "If your email is in our system, you will receive a login link shortly."
+     )
      |> push_navigate(to: ~p"/users/log-in")}
   end
 
   defp local_mail_adapter? do
-    Application.get_env(:bidirectional_translations, BidirectionalTranslations.Mailer)[:adapter] == Swoosh.Adapters.Local
+    Application.get_env(:bidirectional_translations, BidirectionalTranslations.Mailer)[:adapter] ==
+      Swoosh.Adapters.Local
   end
 end

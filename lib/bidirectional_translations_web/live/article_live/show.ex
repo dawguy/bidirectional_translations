@@ -43,6 +43,15 @@ defmodule BidirectionalTranslationsWeb.ArticleLive.Show do
               >
                 Source ↗
               </a>
+              <a
+                :if={@article.reader_url}
+                href={@article.reader_url}
+                target="_blank"
+                rel="noopener"
+                class="link link-hover text-sm"
+              >
+                Reader ↗
+              </a>
             </div>
           </div>
           <.link navigate={~p"/articles/#{@article}/edit"} class="btn btn-ghost btn-sm">

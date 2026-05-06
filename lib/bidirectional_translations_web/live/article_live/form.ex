@@ -94,11 +94,18 @@ defmodule BidirectionalTranslationsWeb.ArticleLive.Form do
             />
           </div>
 
-          <.input
-            field={@form[:source_url]}
-            label="Source URL (optional)"
-            placeholder="https://..."
-          />
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <.input
+              field={@form[:source_url]}
+              label="Source URL (optional)"
+              placeholder="https://..."
+            />
+            <.input
+              field={@form[:reader_url]}
+              label="Reader URL (optional)"
+              placeholder="https://www.lingq.com/... or https://kimchi-reader.app/..."
+            />
+          </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <.input

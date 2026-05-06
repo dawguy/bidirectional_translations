@@ -5,7 +5,7 @@ defmodule BidirectionalTranslationsWeb.PageController do
     if conn.assigns[:current_scope] do
       redirect(conn, to: ~p"/dashboard")
     else
-      render(conn, :home)
+      redirect(conn, to: ~p"/users/log-in")
     end
   end
 end

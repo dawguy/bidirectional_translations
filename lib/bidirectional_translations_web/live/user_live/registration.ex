@@ -7,38 +7,40 @@ defmodule BidirectionalTranslationsWeb.UserLive.Registration do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash} current_scope={@current_scope}>
-      <div class="mx-auto max-w-sm">
+    <div class="flex min-h-[calc(100vh-65px)] items-center justify-center px-4 py-12">
+      <div class="w-full max-w-sm space-y-6">
         <div class="text-center">
-          <.header>
-            Register for an account
-            <:subtitle>
-              Already registered?
-              <.link navigate={~p"/users/log-in"} class="font-semibold text-brand hover:underline">
-                Log in
-              </.link>
-              to your account now.
-            </:subtitle>
-          </.header>
+          <h1 class="text-2xl font-bold tracking-tight">Create an account</h1>
+          <p class="mt-1 text-sm text-base-content/60">
+            Start practicing your translations today.
+          </p>
         </div>
 
-        <.form for={@form} id="registration_form" phx-submit="save" phx-change="validate">
-          <.input
-            field={@form[:email]}
-            type="email"
-            label="Email"
-            autocomplete="username"
-            spellcheck="false"
-            required
-            phx-mounted={JS.focus()}
-          />
+        <div class="card bg-base-100 border border-base-300 shadow-sm">
+          <div class="card-body gap-4 p-6">
+            <.form for={@form} id="registration_form" phx-submit="save" phx-change="validate">
+              <.input
+                field={@form[:email]}
+                type="email"
+                label="Email"
+                autocomplete="username"
+                spellcheck="false"
+                required
+                phx-mounted={JS.focus()}
+              />
+              <.button phx-disable-with="Creating account..." class="btn btn-primary w-full mt-1">
+                Create account
+              </.button>
+            </.form>
+          </div>
+        </div>
 
-          <.button phx-disable-with="Creating account..." class="btn btn-primary w-full">
-            Create an account
-          </.button>
-        </.form>
+        <p class="text-center text-sm text-base-content/60">
+          Already have an account?
+          <.link navigate={~p"/users/log-in"} class="link font-medium">Sign in</.link>
+        </p>
       </div>
-    </Layouts.app>
+    </div>
     """
   end
 
