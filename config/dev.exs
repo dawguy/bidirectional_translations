@@ -2,9 +2,10 @@ import Config
 
 # Configure your database
 config :bidirectional_translations, BidirectionalTranslations.Repo,
-  username: "postgres",
-  password: "postgres",
+  username: "wikipedia",
+  password: "wikipedia",
   hostname: "localhost",
+  port: 5435,
   database: "bidirectional_translations_dev",
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,
