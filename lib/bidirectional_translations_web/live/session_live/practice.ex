@@ -179,9 +179,9 @@ defmodule BidirectionalTranslationsWeb.SessionLive.Practice do
   defp source_label(%{direction: :target_to_english, article: article}),
     do: language_name(article.language)
 
-  defp source_label(%{direction: :english_to_target, _: _}), do: "English"
+  defp source_label(%{direction: :english_to_target}), do: "English"
 
-  defp answer_label(%{direction: :target_to_english, _: _}), do: "English"
+  defp answer_label(%{direction: :target_to_english}), do: "English"
 
   defp answer_label(%{direction: :english_to_target, article: article}),
     do: language_name(article.language)
