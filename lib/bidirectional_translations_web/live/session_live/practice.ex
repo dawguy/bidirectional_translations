@@ -77,9 +77,7 @@ defmodule BidirectionalTranslationsWeb.SessionLive.Practice do
             <p class="text-xs font-semibold uppercase tracking-wider text-base-content/50 mb-2">
               {source_label(@session)}
             </p>
-            <div class="bg-base-200 rounded-lg p-4 text-sm leading-relaxed whitespace-pre-wrap min-h-96">
-              {source_text(@session)}
-            </div>
+            <div class="bg-base-200 rounded-lg p-4 text-sm leading-relaxed whitespace-pre-wrap min-h-96">{source_text(@session)}</div>
           </div>
 
           <div class="space-y-3">
@@ -87,12 +85,7 @@ defmodule BidirectionalTranslationsWeb.SessionLive.Practice do
               Your translation — {answer_label(@session)}
             </p>
             <form phx-change="save_attempt">
-              <textarea
-                name="body"
-                phx-debounce="800"
-                class="textarea textarea-bordered w-full min-h-96 text-sm leading-relaxed font-sans"
-                placeholder="Start typing your translation..."
-              >{@attempt_body}</textarea>
+              <textarea name="body" phx-debounce="800" class="textarea textarea-bordered w-full min-h-96 text-sm leading-relaxed font-sans" placeholder="Start typing your translation...">{@attempt_body}</textarea>
             </form>
             <div class="flex items-center justify-between">
               <button phx-click="toggle_peek" class="btn btn-ghost btn-sm">
@@ -114,9 +107,7 @@ defmodule BidirectionalTranslationsWeb.SessionLive.Practice do
           <div class="divider text-xs uppercase tracking-wider opacity-50">
             Professional translation
           </div>
-          <div class="bg-base-200 rounded-lg p-4 text-sm leading-relaxed whitespace-pre-wrap">
-            {answer_text(@session)}
-          </div>
+          <div class="bg-base-200 rounded-lg p-4 text-sm leading-relaxed whitespace-pre-wrap">{answer_text(@session)}</div>
         </div>
       </div>
 
@@ -141,27 +132,19 @@ defmodule BidirectionalTranslationsWeb.SessionLive.Practice do
             <p class="text-xs font-semibold uppercase tracking-wider text-base-content/50 mb-2">
               My draft — {answer_label(@session)}
             </p>
-            <div class="bg-base-200 rounded-lg p-4 text-sm leading-relaxed whitespace-pre-wrap min-h-48">
-              {if @session.attempt,
-                do: @session.attempt.body,
-                else: "(no attempt recorded)"}
-            </div>
+            <div class="bg-base-200 rounded-lg p-4 text-sm leading-relaxed whitespace-pre-wrap min-h-48">{if @session.attempt, do: @session.attempt.body, else: "(no attempt recorded)"}</div>
           </div>
           <div>
             <p class="text-xs font-semibold uppercase tracking-wider text-base-content/50 mb-2">
               {answer_label(@session)} — professional
             </p>
-            <div class="bg-base-100 border border-base-300 rounded-lg p-4 text-sm leading-relaxed whitespace-pre-wrap min-h-48">
-              {answer_text(@session)}
-            </div>
+            <div class="bg-base-100 border border-base-300 rounded-lg p-4 text-sm leading-relaxed whitespace-pre-wrap min-h-48">{answer_text(@session)}</div>
           </div>
           <div>
             <p class="text-xs font-semibold uppercase tracking-wider text-base-content/50 mb-2">
               {source_label(@session)} — source
             </p>
-            <div class="bg-base-100 border border-base-300 rounded-lg p-4 text-sm leading-relaxed whitespace-pre-wrap min-h-48">
-              {source_text(@session)}
-            </div>
+            <div class="bg-base-100 border border-base-300 rounded-lg p-4 text-sm leading-relaxed whitespace-pre-wrap min-h-48">{source_text(@session)}</div>
           </div>
         </div>
 

@@ -55,17 +55,13 @@ defmodule BidirectionalTranslationsWeb.ArticleLive.Show do
             <h2 class="text-xs font-semibold uppercase tracking-wider text-base-content/50 mb-2">
               English
             </h2>
-            <div class="bg-base-200 rounded-lg p-4 text-sm leading-relaxed whitespace-pre-wrap">
-              {@article.english_text}
-            </div>
+            <div class="bg-base-200 rounded-lg p-4 text-sm leading-relaxed whitespace-pre-wrap">{@article.english_text}</div>
           </div>
           <div>
             <h2 class="text-xs font-semibold uppercase tracking-wider text-base-content/50 mb-2">
               {language_name(@article.language)}
             </h2>
-            <div class="bg-base-200 rounded-lg p-4 text-sm leading-relaxed whitespace-pre-wrap">
-              {@article.target_text}
-            </div>
+            <div class="bg-base-200 rounded-lg p-4 text-sm leading-relaxed whitespace-pre-wrap">{@article.target_text}</div>
           </div>
         </div>
 
@@ -110,9 +106,7 @@ defmodule BidirectionalTranslationsWeb.ArticleLive.Show do
                   <p class="text-xs font-semibold uppercase tracking-wider text-base-content/50 mb-2">
                     Your attempt
                   </p>
-                  <div class="bg-base-200 rounded p-3 text-sm leading-relaxed whitespace-pre-wrap">
-                    {session.attempt.body}
-                  </div>
+                  <div class="bg-base-200 rounded p-3 text-sm leading-relaxed whitespace-pre-wrap">{session.attempt.body}</div>
                 </div>
               </div>
             </div>

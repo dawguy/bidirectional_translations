@@ -15,6 +15,7 @@ defmodule BidirectionalTranslations.Translations.Attempt do
   def changeset(attempt, attrs) do
     attempt
     |> cast(attrs, [:body, :session_id])
+    |> update_change(:body, &String.trim/1)
     |> validate_required([:body, :session_id])
     |> foreign_key_constraint(:session_id)
     |> unique_constraint(:session_id)
