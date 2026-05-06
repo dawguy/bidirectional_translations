@@ -86,6 +86,7 @@ defmodule BidirectionalTranslationsWeb do
       import Phoenix.HTML
       # Core UI components
       import BidirectionalTranslationsWeb.CoreComponents
+      import BidirectionalTranslationsWeb.TranslationHelpers
 
       # Common modules used in templates
       alias Phoenix.LiveView.JS

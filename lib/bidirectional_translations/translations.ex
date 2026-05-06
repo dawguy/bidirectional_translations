@@ -22,6 +22,14 @@ defmodule BidirectionalTranslations.Translations do
     |> Repo.all()
   end
 
+  def list_articles_with_sessions(%Scope{} = scope) do
+    Article
+    |> where(user_id: ^scope.user.id)
+    |> order_by(desc: :inserted_at)
+    |> preload(:sessions)
+    |> Repo.all()
+  end
+
   def get_article!(%Scope{} = scope, id) do
     Article
     |> where(user_id: ^scope.user.id, id: ^id)
@@ -30,25 +38,28 @@ defmodule BidirectionalTranslations.Translations do
 
   def create_article(%Scope{} = scope, attrs) do
     Repo.transaction(fn ->
-      article =
-        %Article{user_id: scope.user.id}
-        |> Article.changeset(attrs)
-        |> Repo.insert!()
+      case %Article{user_id: scope.user.id}
+           |> Article.changeset(attrs)
+           |> Repo.insert() do
+        {:ok, article} ->
+          today = Date.utc_today()
 
-      today = Date.utc_today()
+          for {day_offset, direction} <- @default_schedule do
+            %Session{}
+            |> Session.changeset(%{
+              article_id: article.id,
+              user_id: scope.user.id,
+              direction: direction,
+              scheduled_date: Date.add(today, day_offset)
+            })
+            |> Repo.insert!()
+          end
 
-      for {day_offset, direction} <- @default_schedule do
-        %Session{}
-        |> Session.changeset(%{
-          article_id: article.id,
-          user_id: scope.user.id,
-          direction: direction,
-          scheduled_date: Date.add(today, day_offset)
-        })
-        |> Repo.insert!()
+          article
+
+        {:error, changeset} ->
+          Repo.rollback(changeset)
       end
-
-      article
     end)
   end
 

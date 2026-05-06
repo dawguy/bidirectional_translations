@@ -143,18 +143,4 @@ defmodule BidirectionalTranslationsWeb.DashboardLive do
   end
 
   defp overdue?(session, today), do: Date.compare(session.scheduled_date, today) == :lt
-
-  defp direction_label(:target_to_english, _lang), do: "→ English"
-  defp direction_label(:english_to_target, lang), do: "→ #{language_name(lang)}"
-
-  defp language_name("de"), do: "German"
-  defp language_name("ko"), do: "Korean"
-  defp language_name("fr"), do: "French"
-  defp language_name("es"), do: "Spanish"
-  defp language_name("ja"), do: "Japanese"
-  defp language_name("zh"), do: "Chinese"
-  defp language_name("it"), do: "Italian"
-  defp language_name("pt"), do: "Portuguese"
-  defp language_name("ru"), do: "Russian"
-  defp language_name(code), do: code
 end
