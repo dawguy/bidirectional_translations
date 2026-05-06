@@ -31,12 +31,14 @@ defmodule BidirectionalTranslationsWeb.Layouts do
     default: nil,
     doc: "the current [scope](https://hexdocs.pm/phoenix/scopes.html)"
 
+  attr :max_width, :string, default: "max-w-4xl"
+
   slot :inner_block, required: true
 
   def app(assigns) do
     ~H"""
     <main class="px-4 py-8 sm:px-6 lg:px-8">
-      <div class="mx-auto max-w-4xl">
+      <div class={["mx-auto", @max_width]}>
         {render_slot(@inner_block)}
       </div>
     </main>

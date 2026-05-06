@@ -53,7 +53,7 @@ defmodule BidirectionalTranslationsWeb.SessionLive.Practice do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash} current_scope={@current_scope}>
+    <Layouts.app flash={@flash} current_scope={@current_scope} max_width="max-w-7xl">
       <div :if={@mode == :practice} class="space-y-6">
         <div class="flex items-start justify-between gap-4">
           <div>
@@ -136,10 +136,10 @@ defmodule BidirectionalTranslationsWeb.SessionLive.Practice do
           </h1>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
             <p class="text-xs font-semibold uppercase tracking-wider text-base-content/50 mb-2">
-              Your attempt
+              My draft — {answer_label(@session)}
             </p>
             <div class="bg-base-200 rounded-lg p-4 text-sm leading-relaxed whitespace-pre-wrap min-h-48">
               {if @session.attempt,
@@ -149,10 +149,18 @@ defmodule BidirectionalTranslationsWeb.SessionLive.Practice do
           </div>
           <div>
             <p class="text-xs font-semibold uppercase tracking-wider text-base-content/50 mb-2">
-              Professional translation
+              {answer_label(@session)} — professional
             </p>
-            <div class="bg-base-200 rounded-lg p-4 text-sm leading-relaxed whitespace-pre-wrap min-h-48">
+            <div class="bg-base-100 border border-base-300 rounded-lg p-4 text-sm leading-relaxed whitespace-pre-wrap min-h-48">
               {answer_text(@session)}
+            </div>
+          </div>
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-wider text-base-content/50 mb-2">
+              {source_label(@session)} — source
+            </p>
+            <div class="bg-base-100 border border-base-300 rounded-lg p-4 text-sm leading-relaxed whitespace-pre-wrap min-h-48">
+              {source_text(@session)}
             </div>
           </div>
         </div>
