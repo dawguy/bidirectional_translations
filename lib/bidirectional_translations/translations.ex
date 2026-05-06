@@ -1,0 +1,146 @@
+defmodule BidirectionalTranslations.Translations do
+  import Ecto.Query
+
+  alias BidirectionalTranslations.Repo
+  alias BidirectionalTranslations.Accounts.Scope
+  alias BidirectionalTranslations.Translations.{Article, Session, Attempt}
+
+  # Day offset and direction for auto-scheduled sessions on article creation
+  @default_schedule [
+    {0, :target_to_english},
+    {3, :english_to_target},
+    {7, :english_to_target},
+    {14, :english_to_target}
+  ]
+
+  ## Articles
+
+  def list_articles(%Scope{} = scope) do
+    Article
+    |> where(user_id: ^scope.user.id)
+    |> order_by(desc: :inserted_at)
+    |> Repo.all()
+  end
+
+  def get_article!(%Scope{} = scope, id) do
+    Article
+    |> where(user_id: ^scope.user.id, id: ^id)
+    |> Repo.one!()
+  end
+
+  def create_article(%Scope{} = scope, attrs) do
+    Repo.transaction(fn ->
+      article =
+        %Article{user_id: scope.user.id}
+        |> Article.changeset(attrs)
+        |> Repo.insert!()
+
+      today = Date.utc_today()
+
+      for {day_offset, direction} <- @default_schedule do
+        %Session{}
+        |> Session.changeset(%{
+          article_id: article.id,
+          user_id: scope.user.id,
+          direction: direction,
+          scheduled_date: Date.add(today, day_offset)
+        })
+        |> Repo.insert!()
+      end
+
+      article
+    end)
+  end
+
+  def update_article(%Scope{} = scope, %Article{} = article, attrs) do
+    true = article.user_id == scope.user.id
+
+    article
+    |> Article.changeset(attrs)
+    |> Repo.update()
+  end
+
+  def delete_article(%Scope{} = scope, %Article{} = article) do
+    true = article.user_id == scope.user.id
+    Repo.delete(article)
+  end
+
+  def change_article(%Article{} = article, attrs \\ %{}) do
+    Article.changeset(article, attrs)
+  end
+
+  ## Sessions
+
+  @doc """
+  Returns pending/postponed sessions due on or before `date` (default today).
+  Ordered oldest-first so overdue items surface at the top.
+  """
+  def list_due_sessions(%Scope{} = scope, date \\ Date.utc_today()) do
+    Session
+    |> where(user_id: ^scope.user.id)
+    |> where([s], s.scheduled_date <= ^date)
+    |> where([s], s.status in [:pending, :postponed])
+    |> order_by(asc: :scheduled_date)
+    |> preload(:article)
+    |> Repo.all()
+  end
+
+  @doc """
+  Returns pending/postponed sessions scheduled in the next `days` days after `date`.
+  """
+  def list_upcoming_sessions(%Scope{} = scope, date \\ Date.utc_today(), days \\ 7) do
+    window_end = Date.add(date, days)
+
+    Session
+    |> where(user_id: ^scope.user.id)
+    |> where([s], s.scheduled_date > ^date and s.scheduled_date <= ^window_end)
+    |> where([s], s.status in [:pending, :postponed])
+    |> order_by(asc: :scheduled_date)
+    |> preload(:article)
+    |> Repo.all()
+  end
+
+  def list_sessions_for_article(%Scope{} = scope, %Article{} = article) do
+    Session
+    |> where(user_id: ^scope.user.id, article_id: ^article.id)
+    |> order_by(asc: :scheduled_date)
+    |> preload(:attempt)
+    |> Repo.all()
+  end
+
+  def get_session!(%Scope{} = scope, id) do
+    Session
+    |> where(user_id: ^scope.user.id, id: ^id)
+    |> preload([:article, :attempt])
+    |> Repo.one!()
+  end
+
+  def postpone_session(%Session{} = session, new_date) do
+    session
+    |> Session.changeset(%{scheduled_date: new_date, status: :postponed})
+    |> Repo.update()
+  end
+
+  def complete_session(%Session{} = session) do
+    session
+    |> Session.changeset(%{status: :completed, completed_at: DateTime.utc_now(:second)})
+    |> Repo.update()
+  end
+
+  ## Attempts
+
+  @doc """
+  Inserts or updates the single attempt for a session.
+  Safe to call on every keystroke — uses a DB-level upsert.
+  """
+  def upsert_attempt(%Session{} = session, body) do
+    now = DateTime.utc_now(:second)
+
+    %Attempt{}
+    |> Attempt.changeset(%{body: body, session_id: session.id})
+    |> Repo.insert(
+      on_conflict: [set: [body: body, updated_at: now]],
+      conflict_target: [:session_id]
+    )
+  end
+end
