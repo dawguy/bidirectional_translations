@@ -12,7 +12,7 @@ defmodule BidirectionalTranslations.Application do
       BidirectionalTranslations.Repo,
       {DNSCluster, query: Application.get_env(:bidirectional_translations, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: BidirectionalTranslations.PubSub},
-      if(Mix.env() == :prod, do: BidirectionalTranslations.Mailer.RateLimiter),
+      BidirectionalTranslations.Mailer.RateLimiter,
       # Start to serve requests, typically the last entry
       BidirectionalTranslationsWeb.Endpoint
     ]

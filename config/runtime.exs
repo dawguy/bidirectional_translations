@@ -34,7 +34,7 @@ if config_env() == :prod do
   maybe_ipv6 = if System.get_env("ECTO_IPV6") in ~w(true 1), do: [:inet6], else: []
 
   config :bidirectional_translations, BidirectionalTranslations.Repo,
-    # ssl: true,
+    ssl: true,
     url: database_url,
     pool_size: String.to_integer(System.get_env("POOL_SIZE") || "2"),
     # For machines with several cores, consider starting multiple pools of `pool_size`
@@ -100,9 +100,13 @@ if config_env() == :prod do
   #
   # Check `Plug.SSL` for all available options in `force_ssl`.
 
-  config :bidirectional_translations, BidirectionalTranslations.Mailer,
-    adapter: BidirectionalTranslations.Mailer.RateLimitedAdapter,
-    inner_adapter: Swoosh.Adapters.Resend,
-    api_key: System.get_env("RESEND_API_KEY") ||
-      raise("environment variable RESEND_API_KEY is missing.")
+  if api_key = System.get_env("RESEND_API_KEY") do
+    config :bidirectional_translations, BidirectionalTranslations.Mailer,
+      adapter: BidirectionalTranslations.Mailer.RateLimitedAdapter,
+      inner_adapter: Swoosh.Adapters.Resend,
+      api_key: api_key
+  else
+    config :bidirectional_translations, BidirectionalTranslations.Mailer,
+      adapter: Swoosh.Adapters.Local
+  end
 end
