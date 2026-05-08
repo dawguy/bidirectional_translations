@@ -37,3 +37,4 @@ bidirectional_translations-*.tar
 npm-debug.log
 /assets/node_modules/
 
+.neon
