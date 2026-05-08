@@ -1,15 +1,40 @@
 import Config
 
+# Load .env file if it exists (keeps secrets out of git)
+if File.exists?(".env") do
+  File.stream!(".env")
+  |> Enum.each(fn line ->
+    line = String.trim(line)
+
+    case String.split(line, "=", parts: 2) do
+      [key, value] when key != "" and not String.starts_with?(key, "#") ->
+        System.put_env(String.trim(key), String.trim(value))
+
+      _ ->
+        :ok
+    end
+  end)
+end
+
 # Configure your database
-config :bidirectional_translations, BidirectionalTranslations.Repo,
-  username: "wikipedia",
-  password: "wikipedia",
-  hostname: "localhost",
-  port: 5435,
-  database: "bidirectional_translations_dev",
-  stacktrace: true,
-  show_sensitive_data_on_connection_error: true,
-  pool_size: 10
+if database_url = System.get_env("DATABASE_URL") do
+  config :bidirectional_translations, BidirectionalTranslations.Repo,
+    url: database_url,
+    ssl: true,
+    stacktrace: true,
+    show_sensitive_data_on_connection_error: true,
+    pool_size: 2
+else
+  config :bidirectional_translations, BidirectionalTranslations.Repo,
+    username: "wikipedia",
+    password: "wikipedia",
+    hostname: "localhost",
+    port: 5435,
+    database: "bidirectional_translations_dev",
+    stacktrace: true,
+    show_sensitive_data_on_connection_error: true,
+    pool_size: 10
+end
 
 # For development, we disable any cache and enable
 # debugging and code reloading.

@@ -25,6 +25,8 @@ erl_crash.dump
 # Ignore package tarball (built via "mix hex.build").
 bidirectional_translations-*.tar
 
+.env
+
 # Ignore assets that are produced by build tools.
 /priv/static/assets/
 

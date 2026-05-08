@@ -48,6 +48,8 @@ config :bidirectional_translations, BidirectionalTranslationsWeb.Endpoint,
 config :bidirectional_translations, BidirectionalTranslations.Mailer,
   adapter: Swoosh.Adapters.Local
 
+config :swoosh, :api_client, Swoosh.ApiClient.Req
+
 # Configure esbuild (the version is required)
 config :esbuild,
   version: "0.25.4",

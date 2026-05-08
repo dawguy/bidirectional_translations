@@ -12,11 +12,11 @@ defmodule BidirectionalTranslations.Application do
       BidirectionalTranslations.Repo,
       {DNSCluster, query: Application.get_env(:bidirectional_translations, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: BidirectionalTranslations.PubSub},
-      # Start a worker by calling: BidirectionalTranslations.Worker.start_link(arg)
-      # {BidirectionalTranslations.Worker, arg},
+      if(Mix.env() == :prod, do: BidirectionalTranslations.Mailer.RateLimiter),
       # Start to serve requests, typically the last entry
       BidirectionalTranslationsWeb.Endpoint
     ]
+    |> Enum.reject(&is_nil/1)
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
