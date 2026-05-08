@@ -7,6 +7,9 @@ VERSION="${1:-latest}"
 IMAGE="bloodisblue/bidirectional-translations:${VERSION}"
 PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
+echo "==> Building assets natively (tailwind doesn't work under QEMU)"
+cd "${PROJECT_DIR}" && mix assets.deploy
+
 echo "==> Building Docker image: ${IMAGE} (amd64 for droplet)"
 docker build --platform linux/amd64 -t "${IMAGE}" "${PROJECT_DIR}"
 

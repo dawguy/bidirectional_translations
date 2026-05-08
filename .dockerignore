@@ -39,8 +39,6 @@
 # Generated on crash by the VM
 erl_crash.dump
 
-# Static artifacts - These should be fetched and built inside the Docker image
-# https://hexdocs.pm/phoenix/Mix.Tasks.Phx.Gen.Release.html#module-docker
-/assets/node_modules/
-/priv/static/assets/
-/priv/static/cache_manifest.json
+# Static artifacts - Pre-built natively on macOS (tailwind/Bun breaks under QEMU)
+# DO NOT ignore these - they are copied into the Docker image
+# /assets/node_modules/

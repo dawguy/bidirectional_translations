@@ -120,5 +120,13 @@ config :phoenix_live_view,
   # Enable helpful, but potentially expensive runtime checks
   enable_expensive_runtime_checks: true
 
-# Disable swoosh api client as it is only required for production adapters.
-config :swoosh, :api_client, false
+# Use Resend if API key is set, otherwise fall back to local adapter
+if api_key = System.get_env("RESEND_API_KEY") do
+  config :swoosh, :api_client, Swoosh.ApiClient.Req
+  config :bidirectional_translations, BidirectionalTranslations.Mailer,
+    adapter: BidirectionalTranslations.Mailer.RateLimitedAdapter,
+    inner_adapter: Swoosh.Adapters.Resend,
+    api_key: api_key
+else
+  config :swoosh, :api_client, false
+end
