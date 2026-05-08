@@ -7,8 +7,13 @@ if File.exists?(".env") do
     line = String.trim(line)
 
     case String.split(line, "=", parts: 2) do
-      [key, value] when key != "" and not String.starts_with?(key, "#") ->
-        System.put_env(String.trim(key), String.trim(value))
+      [key, value] when key != "" ->
+        key = String.trim(key)
+        value = String.trim(value) |> String.trim("\"") |> String.trim("'")
+
+        if not String.starts_with?(key, "#") do
+          System.put_env(key, value)
+        end
 
       _ ->
         :ok
