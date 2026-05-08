@@ -7,8 +7,8 @@ VERSION="${1:-latest}"
 IMAGE="bloodisblue/bidirectional-translations:${VERSION}"
 PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
-echo "==> Building Docker image: ${IMAGE}"
-docker build -t "${IMAGE}" "${PROJECT_DIR}"
+echo "==> Building Docker image: ${IMAGE} (amd64 for droplet)"
+docker build --platform linux/amd64 -t "${IMAGE}" "${PROJECT_DIR}"
 
 echo "==> Pushing to Docker Hub"
 docker push "${IMAGE}"
