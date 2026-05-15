@@ -6,7 +6,10 @@ defmodule BidirectionalTranslationsWeb.ArticleLive.Form do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, :language_options, language_options())}
+    {:ok,
+     socket
+     |> assign(:language_options, language_options())
+     |> assign(:last_language, nil)}
   end
 
   @impl true
@@ -15,7 +18,7 @@ defmodule BidirectionalTranslationsWeb.ArticleLive.Form do
   end
 
   defp apply_action(socket, :new, _params) do
-    article = %Article{}
+    article = %Article{language: socket.assigns.last_language}
 
     socket
     |> assign(:page_title, "New Article")
@@ -45,6 +48,17 @@ defmodule BidirectionalTranslationsWeb.ArticleLive.Form do
 
   def handle_event("save", %{"article" => params}, socket) do
     save_article(socket, socket.assigns.live_action, params)
+  end
+
+  def handle_event("restore_language", %{"language" => lang}, socket) do
+    article = %Article{socket.assigns.article | language: lang}
+    form = to_form(Translations.change_article(article))
+
+    {:noreply,
+     socket
+     |> assign(:last_language, lang)
+     |> assign(:article, article)
+     |> assign(:form, form)}
   end
 
   defp save_article(socket, :new, params) do
@@ -80,7 +94,7 @@ defmodule BidirectionalTranslationsWeb.ArticleLive.Form do
       <div class="space-y-6">
         <h1 class="text-2xl font-bold">{@page_title}</h1>
 
-        <.form for={@form} phx-change="validate" phx-submit="save" class="space-y-4">
+        <.form for={@form} phx-change="validate" phx-submit="save" class="space-y-4" id="article-form" phx-hook=".RememberLanguage">
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div class="md:col-span-2">
               <.input field={@form[:title]} label="Title" placeholder="Article title" />
@@ -138,6 +152,24 @@ defmodule BidirectionalTranslationsWeb.ArticleLive.Form do
         </.form>
       </div>
     </Layouts.app>
+
+    <script :type={Phoenix.LiveView.ColocatedHook} name=".RememberLanguage" id="remember-language-hook" phx-update="ignore">
+      export default {
+        mounted() {
+          // Restore last selected language
+          const stored = localStorage.getItem("last_language")
+          if (stored) this.pushEvent("restore_language", {language: stored})
+
+          // Auto-save language on change for next time
+          const select = this.el.querySelector("select[name='article[language]']")
+          if (select) {
+            select.addEventListener("change", e => {
+              localStorage.setItem("last_language", e.target.value)
+            })
+          }
+        }
+      }
+    </script>
     """
   end
 end
