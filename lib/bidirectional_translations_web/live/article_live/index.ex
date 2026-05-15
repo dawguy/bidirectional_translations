@@ -8,7 +8,8 @@ defmodule BidirectionalTranslationsWeb.ArticleLive.Index do
     {:ok,
      socket
      |> assign(:page_title, "Articles")
-     |> assign(:articles, Translations.list_articles_with_sessions(socket.assigns.current_scope))}
+     |> assign(:articles, Translations.list_articles_with_sessions(socket.assigns.current_scope))
+     |> assign(:deleting_id, nil)}
   end
 
   @impl true
@@ -19,7 +20,16 @@ defmodule BidirectionalTranslationsWeb.ArticleLive.Index do
     {:noreply,
      socket
      |> put_flash(:info, "Article deleted.")
+     |> assign(:deleting_id, nil)
      |> assign(:articles, Translations.list_articles_with_sessions(socket.assigns.current_scope))}
+  end
+
+  def handle_event("open_delete_confirm", %{"id" => id}, socket) do
+    {:noreply, assign(socket, :deleting_id, String.to_integer(id))}
+  end
+
+  def handle_event("cancel_delete", _params, socket) do
+    {:noreply, assign(socket, :deleting_id, nil)}
   end
 
   @impl true
@@ -62,12 +72,28 @@ defmodule BidirectionalTranslationsWeb.ArticleLive.Index do
                     Edit
                   </.link>
                   <button
-                    phx-click="delete"
+                    phx-click="open_delete_confirm"
                     phx-value-id={article.id}
-                    phx-confirm="Delete this article and all its sessions?"
                     class="btn btn-ghost btn-sm text-error"
                   >
                     Delete
+                  </button>
+                </div>
+              </div>
+
+              <%!-- Inline delete confirmation --%>
+              <div :if={@deleting_id == article.id} class="mt-4 pt-4 border-t border-base-300">
+                <p class="text-sm mb-3">
+                  Delete <strong>{article.title}</strong> and all its practice sessions?
+                  <br class="hidden sm:inline" />
+                  <span class="text-error">This cannot be undone.</span>
+                </p>
+                <div class="flex gap-2">
+                  <button phx-click="delete" phx-value-id={article.id} class="btn btn-error btn-sm">
+                    Yes, delete
+                  </button>
+                  <button phx-click="cancel_delete" class="btn btn-ghost btn-sm">
+                    Cancel
                   </button>
                 </div>
               </div>
