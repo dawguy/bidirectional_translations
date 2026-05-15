@@ -42,18 +42,17 @@ defmodule BidirectionalTranslations.Translations do
            |> Article.changeset(attrs)
            |> Repo.insert() do
         {:ok, article} ->
-          today = Date.utc_today()
+          # Only create the first session — subsequent ones appear after each completion
+          {day_offset, direction} = hd(@default_schedule)
 
-          for {day_offset, direction} <- @default_schedule do
-            %Session{}
-            |> Session.changeset(%{
-              article_id: article.id,
-              user_id: scope.user.id,
-              direction: direction,
-              scheduled_date: Date.add(today, day_offset)
-            })
-            |> Repo.insert!()
-          end
+          %Session{}
+          |> Session.changeset(%{
+            article_id: article.id,
+            user_id: scope.user.id,
+            direction: direction,
+            scheduled_date: Date.add(Date.utc_today(), day_offset)
+          })
+          |> Repo.insert!()
 
           article
 
@@ -111,6 +110,22 @@ defmodule BidirectionalTranslations.Translations do
     |> Repo.all()
   end
 
+  @doc """
+  Returns the single earliest pending/postponed session per article on or after `date`.
+  Uses PostgreSQL DISTINCT ON to pick the minimum scheduled_date per article_id.
+  Future sessions for the same article are hidden until the earliest one is completed.
+  """
+  def list_next_sessions(%Scope{} = scope, date \\ Date.utc_today()) do
+    Session
+    |> where(user_id: ^scope.user.id)
+    |> where([s], s.scheduled_date >= ^date)
+    |> where([s], s.status in [:pending, :postponed])
+    |> order_by([s], asc: s.article_id, asc: s.scheduled_date)
+    |> distinct([s], s.article_id)
+    |> preload(:article)
+    |> Repo.all()
+  end
+
   def list_sessions_for_article(%Scope{} = scope, %Article{} = article) do
     Session
     |> where(user_id: ^scope.user.id, article_id: ^article.id)
@@ -133,9 +148,39 @@ defmodule BidirectionalTranslations.Translations do
   end
 
   def complete_session(%Session{} = session) do
-    session
-    |> Session.changeset(%{status: :completed, completed_at: DateTime.utc_now(:second)})
-    |> Repo.update()
+    Repo.transaction(fn ->
+      updated =
+        session
+        |> Session.changeset(%{status: :completed, completed_at: DateTime.utc_now(:second)})
+        |> Repo.update!()
+
+      # Auto-schedule the next session if there's one remaining
+      complete_count =
+        Session
+        |> where(article_id: ^session.article_id, status: :completed)
+        |> Repo.aggregate(:count)
+
+      scheduled = Enum.at(@default_schedule, complete_count)
+
+      if scheduled do
+        {day_offset, direction} = scheduled
+
+        %Session{}
+        |> Session.changeset(%{
+          article_id: session.article_id,
+          user_id: session.user_id,
+          direction: direction,
+          scheduled_date: Date.add(Date.utc_today(), day_offset)
+        })
+        |> Repo.insert!()
+      end
+
+      updated
+    end)
+    |> case do
+      {:ok, updated} -> {:ok, updated}
+      {:error, reason} -> {:error, reason}
+    end
   end
 
   ## Attempts

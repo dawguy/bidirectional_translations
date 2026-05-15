@@ -7,16 +7,18 @@ defmodule BidirectionalTranslations.Application do
 
   @impl true
   def start(_type, _args) do
-    children = [
-      BidirectionalTranslationsWeb.Telemetry,
-      BidirectionalTranslations.Repo,
-      {DNSCluster, query: Application.get_env(:bidirectional_translations, :dns_cluster_query) || :ignore},
-      {Phoenix.PubSub, name: BidirectionalTranslations.PubSub},
-      BidirectionalTranslations.Mailer.RateLimiter,
-      # Start to serve requests, typically the last entry
-      BidirectionalTranslationsWeb.Endpoint
-    ]
-    |> Enum.reject(&is_nil/1)
+    children =
+      [
+        BidirectionalTranslationsWeb.Telemetry,
+        BidirectionalTranslations.Repo,
+        {DNSCluster,
+         query: Application.get_env(:bidirectional_translations, :dns_cluster_query) || :ignore},
+        {Phoenix.PubSub, name: BidirectionalTranslations.PubSub},
+        BidirectionalTranslations.Mailer.RateLimiter,
+        # Start to serve requests, typically the last entry
+        BidirectionalTranslationsWeb.Endpoint
+      ]
+      |> Enum.reject(&is_nil/1)
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options

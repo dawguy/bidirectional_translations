@@ -46,7 +46,9 @@ defmodule BidirectionalTranslationsWeb.ArticleLive.Index do
                 <div class="min-w-0">
                   <div class="flex items-center gap-2 mb-1 flex-wrap">
                     <h2 class="font-semibold">{article.title}</h2>
-                    <span class="badge badge-neutral badge-sm">{language_name(article.language)}</span>
+                    <span class="badge badge-neutral badge-sm">
+                      {language_name(article.language)}
+                    </span>
                   </div>
                   <p class="text-sm text-base-content/60">
                     {session_progress(article.sessions)} sessions complete

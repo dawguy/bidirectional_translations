@@ -173,7 +173,11 @@ defmodule BidirectionalTranslationsWeb.UserAuth do
   """
   def disconnect_sessions(tokens) do
     Enum.each(tokens, fn %{token: token} ->
-      BidirectionalTranslationsWeb.Endpoint.broadcast(user_session_topic(token), "disconnect", %{})
+      BidirectionalTranslationsWeb.Endpoint.broadcast(
+        user_session_topic(token),
+        "disconnect",
+        %{}
+      )
     end)
   end
 

@@ -41,9 +41,13 @@
       </div>
       <div class="flex items-center gap-2">
         <%= if @current_scope do %>
-          <span class="text-sm text-base-content/60 hidden sm:inline">{@current_scope.user.email}</span>
+          <span class="text-sm text-base-content/60 hidden sm:inline">
+            {@current_scope.user.email}
+          </span>
           <.link href={~p"/users/settings"} class="btn btn-ghost btn-sm">Settings</.link>
-          <.link href={~p"/users/log-out"} method="delete" class="btn btn-ghost btn-sm">Log out</.link>
+          <.link href={~p"/users/log-out"} method="delete" class="btn btn-ghost btn-sm">
+            Log out
+          </.link>
         <% else %>
           <.link href={~p"/users/register"} class="btn btn-ghost btn-sm">Register</.link>
           <.link href={~p"/users/log-in"} class="btn btn-primary btn-sm">Log in</.link>

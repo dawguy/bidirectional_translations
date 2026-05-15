@@ -123,6 +123,7 @@ config :phoenix_live_view,
 # Use Resend if API key is set, otherwise fall back to local adapter
 if api_key = System.get_env("RESEND_API_KEY") do
   config :swoosh, :api_client, Swoosh.ApiClient.Req
+
   config :bidirectional_translations, BidirectionalTranslations.Mailer,
     adapter: BidirectionalTranslations.Mailer.RateLimitedAdapter,
     inner_adapter: Swoosh.Adapters.Resend,

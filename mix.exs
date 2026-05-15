@@ -83,7 +83,11 @@ defmodule BidirectionalTranslations.MixProject do
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
-      "assets.build": ["compile", "tailwind bidirectional_translations", "esbuild bidirectional_translations"],
+      "assets.build": [
+        "compile",
+        "tailwind bidirectional_translations",
+        "esbuild bidirectional_translations"
+      ],
       "assets.deploy": [
         "tailwind bidirectional_translations --minify",
         "esbuild bidirectional_translations --minify",

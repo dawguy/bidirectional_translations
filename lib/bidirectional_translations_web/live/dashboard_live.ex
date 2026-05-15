@@ -13,7 +13,7 @@ defmodule BidirectionalTranslationsWeb.DashboardLive do
      |> assign(:page_title, "Dashboard")
      |> assign(:today, today)
      |> assign(:due_sessions, Translations.list_due_sessions(scope, today))
-     |> assign(:upcoming_sessions, Translations.list_upcoming_sessions(scope, today))
+     |> assign(:upcoming_sessions, Translations.list_next_sessions(scope, today))
      |> assign(:postponing_id, nil)}
   end
 
@@ -29,7 +29,8 @@ defmodule BidirectionalTranslationsWeb.DashboardLive do
   def handle_event("postpone_submit", %{"session_id" => id, "date" => date_str}, socket) do
     with {:ok, new_date} <- Date.from_iso8601(date_str),
          :gt <- Date.compare(new_date, socket.assigns.today),
-         session <- Translations.get_session!(socket.assigns.current_scope, String.to_integer(id)),
+         session <-
+           Translations.get_session!(socket.assigns.current_scope, String.to_integer(id)),
          {:ok, _} <- Translations.postpone_session(session, new_date) do
       scope = socket.assigns.current_scope
       today = socket.assigns.today
@@ -37,7 +38,7 @@ defmodule BidirectionalTranslationsWeb.DashboardLive do
       {:noreply,
        socket
        |> assign(:due_sessions, Translations.list_due_sessions(scope, today))
-       |> assign(:upcoming_sessions, Translations.list_upcoming_sessions(scope, today))
+       |> assign(:upcoming_sessions, Translations.list_next_sessions(scope, today))
        |> assign(:postponing_id, nil)
        |> put_flash(:info, "Session postponed to #{new_date}.")}
     else
@@ -69,7 +70,10 @@ defmodule BidirectionalTranslationsWeb.DashboardLive do
                   <div class="min-w-0">
                     <div class="flex items-center gap-2 mb-1 flex-wrap">
                       <h3 class="font-semibold truncate">{session.article.title}</h3>
-                      <span :if={overdue?(session, @today)} class="badge badge-error badge-sm shrink-0">
+                      <span
+                        :if={overdue?(session, @today)}
+                        class="badge badge-error badge-sm shrink-0"
+                      >
                         Overdue
                       </span>
                     </div>
@@ -80,7 +84,10 @@ defmodule BidirectionalTranslationsWeb.DashboardLive do
                     </div>
                   </div>
                   <div class="flex gap-2 shrink-0">
-                    <.link navigate={~p"/sessions/#{session.id}/practice"} class="btn btn-primary btn-sm">
+                    <.link
+                      navigate={~p"/sessions/#{session.id}/practice"}
+                      class="btn btn-primary btn-sm"
+                    >
                       Start
                     </.link>
                     <button

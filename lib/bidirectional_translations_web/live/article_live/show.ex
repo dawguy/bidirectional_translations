@@ -14,7 +14,8 @@ defmodule BidirectionalTranslationsWeb.ArticleLive.Show do
      |> assign(:page_title, article.title)
      |> assign(:article, article)
      |> assign(:sessions, sessions)
-     |> assign(:expanded_attempt_id, nil)}
+     |> assign(:expanded_attempt_id, nil)
+     |> assign(:next_session_id, next_pending_session_id(sessions))}
   end
 
   @impl true
@@ -64,13 +65,17 @@ defmodule BidirectionalTranslationsWeb.ArticleLive.Show do
             <h2 class="text-xs font-semibold uppercase tracking-wider text-base-content/50 mb-2">
               English
             </h2>
-            <div class="bg-base-200 rounded-lg p-4 text-sm leading-relaxed whitespace-pre-wrap">{@article.english_text}</div>
+            <div class="bg-base-200 rounded-lg p-4 text-sm leading-relaxed whitespace-pre-wrap">
+              {@article.english_text}
+            </div>
           </div>
           <div>
             <h2 class="text-xs font-semibold uppercase tracking-wider text-base-content/50 mb-2">
               {language_name(@article.language)}
             </h2>
-            <div class="bg-base-200 rounded-lg p-4 text-sm leading-relaxed whitespace-pre-wrap">{@article.target_text}</div>
+            <div class="bg-base-200 rounded-lg p-4 text-sm leading-relaxed whitespace-pre-wrap">
+              {@article.target_text}
+            </div>
           </div>
         </div>
 
@@ -91,12 +96,18 @@ defmodule BidirectionalTranslationsWeb.ArticleLive.Show do
                   </div>
                   <div class="flex gap-2 shrink-0">
                     <.link
-                      :if={session.status != :completed}
+                      :if={session.id == @next_session_id and session.status != :completed}
                       navigate={~p"/sessions/#{session.id}/practice"}
                       class="btn btn-primary btn-xs"
                     >
                       {if session.status == :pending, do: "Start", else: "Resume"}
                     </.link>
+                    <span
+                      :if={session.id != @next_session_id and session.status != :completed}
+                      class="text-xs text-base-content/40 italic"
+                    >
+                      Complete previous session first
+                    </span>
                     <button
                       :if={session.status == :completed and session.attempt != nil}
                       phx-click="toggle_attempt"
@@ -115,7 +126,9 @@ defmodule BidirectionalTranslationsWeb.ArticleLive.Show do
                   <p class="text-xs font-semibold uppercase tracking-wider text-base-content/50 mb-2">
                     Your attempt
                   </p>
-                  <div class="bg-base-200 rounded p-3 text-sm leading-relaxed whitespace-pre-wrap">{session.attempt.body}</div>
+                  <div class="bg-base-200 rounded p-3 text-sm leading-relaxed whitespace-pre-wrap">
+                    {session.attempt.body}
+                  </div>
                 </div>
               </div>
             </div>
@@ -124,6 +137,16 @@ defmodule BidirectionalTranslationsWeb.ArticleLive.Show do
       </div>
     </Layouts.app>
     """
+  end
+
+  defp next_pending_session_id(sessions) do
+    sessions
+    |> Enum.filter(&(&1.status != :completed))
+    |> Enum.sort_by(& &1.scheduled_date, Date)
+    |> case do
+      [next | _] -> next.id
+      [] -> nil
+    end
   end
 
   defp status_badge_class(:pending), do: "badge-warning"

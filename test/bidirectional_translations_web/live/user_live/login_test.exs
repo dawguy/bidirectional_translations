@@ -27,7 +27,9 @@ defmodule BidirectionalTranslationsWeb.UserLive.LoginTest do
 
       assert html =~ "If your email is in our system"
 
-      assert BidirectionalTranslations.Repo.get_by!(BidirectionalTranslations.Accounts.UserToken, user_id: user.id).context ==
+      assert BidirectionalTranslations.Repo.get_by!(BidirectionalTranslations.Accounts.UserToken,
+               user_id: user.id
+             ).context ==
                "login"
     end
 

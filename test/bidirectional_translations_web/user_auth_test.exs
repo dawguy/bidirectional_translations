@@ -14,7 +14,10 @@ defmodule BidirectionalTranslationsWeb.UserAuthTest do
   setup %{conn: conn} do
     conn =
       conn
-      |> Map.replace!(:secret_key_base, BidirectionalTranslationsWeb.Endpoint.config(:secret_key_base))
+      |> Map.replace!(
+        :secret_key_base,
+        BidirectionalTranslationsWeb.Endpoint.config(:secret_key_base)
+      )
       |> init_test_session(%{})
 
     %{user: %{user_fixture() | authenticated_at: DateTime.utc_now(:second)}, conn: conn}
@@ -91,7 +94,10 @@ defmodule BidirectionalTranslationsWeb.UserAuthTest do
       conn =
         conn
         |> recycle()
-        |> Map.replace!(:secret_key_base, BidirectionalTranslationsWeb.Endpoint.config(:secret_key_base))
+        |> Map.replace!(
+          :secret_key_base,
+          BidirectionalTranslationsWeb.Endpoint.config(:secret_key_base)
+        )
         |> fetch_cookies()
         |> init_test_session(%{user_remember_me: true})
 
@@ -371,7 +377,9 @@ defmodule BidirectionalTranslationsWeb.UserAuthTest do
       tokens = [%{token: "token1"}, %{token: "token2"}]
 
       for %{token: token} <- tokens do
-        BidirectionalTranslationsWeb.Endpoint.subscribe("users_sessions:#{Base.url_encode64(token)}")
+        BidirectionalTranslationsWeb.Endpoint.subscribe(
+          "users_sessions:#{Base.url_encode64(token)}"
+        )
       end
 
       UserAuth.disconnect_sessions(tokens)

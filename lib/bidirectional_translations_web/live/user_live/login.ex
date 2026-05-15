@@ -22,8 +22,7 @@ defmodule BidirectionalTranslationsWeb.UserLive.Login do
         <div :if={local_mail_adapter?()} class="alert alert-info py-2 text-sm">
           <.icon name="hero-information-circle" class="size-4 shrink-0" />
           <span>
-            Local mail adapter active —
-            <.link href="/dev/mailbox" class="underline">view mailbox</.link>.
+            Local mail adapter active — <.link href="/dev/mailbox" class="underline">view mailbox</.link>.
           </span>
         </div>
 

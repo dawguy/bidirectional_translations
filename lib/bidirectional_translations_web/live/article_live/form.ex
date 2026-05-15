@@ -129,9 +129,7 @@ defmodule BidirectionalTranslationsWeb.ArticleLive.Form do
               {if @live_action == :new, do: "Create Article", else: "Save Changes"}
             </.button>
             <.link
-              navigate={
-                if @live_action == :new, do: ~p"/articles", else: ~p"/articles/#{@article}"
-              }
+              navigate={if @live_action == :new, do: ~p"/articles", else: ~p"/articles/#{@article}"}
               class="btn btn-ghost"
             >
               Cancel
