@@ -107,6 +107,6 @@ defmodule BidirectionalTranslationsWeb.ArticleLive.Index do
 
   defp session_progress(sessions) do
     completed = Enum.count(sessions, &(&1.status == :completed))
-    "#{completed}/#{length(sessions)}"
+    "#{completed}/#{Translations.total_session_count()}"
   end
 end

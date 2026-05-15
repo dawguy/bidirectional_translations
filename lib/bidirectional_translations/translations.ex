@@ -13,6 +13,11 @@ defmodule BidirectionalTranslations.Translations do
     {14, :english_to_target}
   ]
 
+  @doc """
+  Returns the total number of sessions in the fixed schedule.
+  """
+  def total_session_count, do: length(@default_schedule)
+
   ## Articles
 
   def list_articles(%Scope{} = scope) do
