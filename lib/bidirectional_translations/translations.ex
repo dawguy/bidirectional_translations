@@ -123,7 +123,7 @@ defmodule BidirectionalTranslations.Translations do
   def list_next_sessions(%Scope{} = scope, date \\ Date.utc_today()) do
     Session
     |> where(user_id: ^scope.user.id)
-    |> where([s], s.scheduled_date >= ^date)
+    |> where([s], s.scheduled_date > ^date)
     |> where([s], s.status in [:pending, :postponed])
     |> order_by([s], asc: s.article_id, asc: s.scheduled_date)
     |> distinct([s], s.article_id)
