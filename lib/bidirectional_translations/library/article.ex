@@ -1,12 +1,10 @@
-defmodule BidirectionalTranslations.Translations.Article do
+defmodule BidirectionalTranslations.Library.Article do
   use Ecto.Schema
   import Ecto.Changeset
 
   alias BidirectionalTranslations.Accounts.User
-  alias BidirectionalTranslations.Library.Article, as: LibraryArticle
-  alias BidirectionalTranslations.Translations.Session
 
-  schema "articles" do
+  schema "library_articles" do
     field :title, :string
     field :language, :string
     field :english_text, :string
@@ -14,9 +12,7 @@ defmodule BidirectionalTranslations.Translations.Article do
     field :source_url, :string
     field :reader_url, :string
 
-    belongs_to :user, User
-    belongs_to :library_article, LibraryArticle
-    has_many :sessions, Session
+    belongs_to :submitted_by_user, User, foreign_key: :submitted_by_user_id
 
     timestamps(type: :utc_datetime)
   end
@@ -30,7 +26,7 @@ defmodule BidirectionalTranslations.Translations.Article do
       :target_text,
       :source_url,
       :reader_url,
-      :library_article_id
+      :submitted_by_user_id
     ])
     |> update_change(:title, &String.trim/1)
     |> update_change(:english_text, &String.trim/1)
@@ -40,9 +36,5 @@ defmodule BidirectionalTranslations.Translations.Article do
     |> validate_required([:title, :language, :english_text, :target_text])
     |> validate_length(:title, max: 255)
     |> validate_inclusion(:language, BidirectionalTranslations.supported_languages())
-    |> unique_constraint(:library_article_id,
-      name: :articles_user_library_unique,
-      message: "has already been added from the library"
-    )
   end
 end

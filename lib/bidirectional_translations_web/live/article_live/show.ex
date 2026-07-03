@@ -37,7 +37,7 @@ defmodule BidirectionalTranslationsWeb.ArticleLive.Show do
               <span class="badge badge-neutral">{language_name(@article.language)}</span>
               <a
                 :if={@article.source_url}
-                href={@article.source_url}
+                href={external_url(@article.source_url)}
                 target="_blank"
                 rel="noopener"
                 class="link link-hover text-sm"
@@ -46,7 +46,7 @@ defmodule BidirectionalTranslationsWeb.ArticleLive.Show do
               </a>
               <a
                 :if={@article.reader_url}
-                href={@article.reader_url}
+                href={external_url(@article.reader_url)}
                 target="_blank"
                 rel="noopener"
                 class="link link-hover text-sm"
@@ -82,43 +82,36 @@ defmodule BidirectionalTranslationsWeb.ArticleLive.Show do
         <div>
           <h2 class="text-lg font-semibold mb-3">Practice Sessions</h2>
           <div class="space-y-2">
-            <div :for={session <- @sessions} class="card bg-base-100 border border-base-300">
-              <div class="card-body p-4 py-3 gap-0">
-                <div class="flex items-center justify-between gap-4">
-                  <div class="flex items-center gap-3 flex-wrap min-w-0">
-                    <span class={["badge badge-sm", status_badge_class(session.status)]}>
-                      {session.status}
-                    </span>
-                    <span class="text-sm font-medium">
-                      {direction_label(session.direction, @article.language)}
-                    </span>
-                    <span class="text-sm text-base-content/60">{session.scheduled_date}</span>
-                  </div>
-                  <div class="flex gap-2 shrink-0">
-                    <.link
-                      :if={session.id == @next_session_id and session.status != :completed}
-                      navigate={~p"/sessions/#{session.id}/practice"}
-                      class="btn btn-primary btn-xs"
-                    >
-                      {if session.status == :pending, do: "Start", else: "Resume"}
-                    </.link>
-                    <span
-                      :if={session.id != @next_session_id and session.status != :completed}
-                      class="text-xs text-base-content/40 italic"
-                    >
-                      Complete previous session first
-                    </span>
-                    <button
-                      :if={session.status == :completed and session.attempt != nil}
-                      phx-click="toggle_attempt"
-                      phx-value-id={session.id}
-                      class="btn btn-ghost btn-xs"
-                    >
-                      {if @expanded_attempt_id == session.id, do: "Hide", else: "View attempt"}
-                    </button>
-                  </div>
-                </div>
-
+            <.session_card
+              :for={session <- @sessions}
+              session={session}
+              target_language={@article.language}
+              show_article_title={false}
+            >
+              <:actions>
+                <.link
+                  :if={session.id == @next_session_id and session.status != :completed}
+                  navigate={~p"/sessions/#{session.id}/practice"}
+                  class="btn btn-primary btn-xs"
+                >
+                  {if session.status == :pending, do: "Start", else: "Resume"}
+                </.link>
+                <span
+                  :if={session.id != @next_session_id and session.status != :completed}
+                  class="text-xs text-base-content/40 italic"
+                >
+                  Complete previous session first
+                </span>
+                <button
+                  :if={session.status == :completed and session.attempt != nil}
+                  phx-click="toggle_attempt"
+                  phx-value-id={session.id}
+                  class="btn btn-ghost btn-xs"
+                >
+                  {if @expanded_attempt_id == session.id, do: "Hide", else: "View attempt"}
+                </button>
+              </:actions>
+              <:expandable>
                 <div
                   :if={@expanded_attempt_id == session.id and session.attempt}
                   class="mt-3 pt-3 border-t border-base-300"
@@ -130,8 +123,8 @@ defmodule BidirectionalTranslationsWeb.ArticleLive.Show do
                     {session.attempt.body}
                   </div>
                 </div>
-              </div>
-            </div>
+              </:expandable>
+            </.session_card>
           </div>
         </div>
       </div>
@@ -148,8 +141,4 @@ defmodule BidirectionalTranslationsWeb.ArticleLive.Show do
       [] -> nil
     end
   end
-
-  defp status_badge_class(:pending), do: "badge-warning"
-  defp status_badge_class(:completed), do: "badge-success"
-  defp status_badge_class(:postponed), do: "badge-info"
 end

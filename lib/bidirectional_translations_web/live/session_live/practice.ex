@@ -175,20 +175,4 @@ defmodule BidirectionalTranslationsWeb.SessionLive.Practice do
     </Layouts.app>
     """
   end
-
-  defp source_text(%{direction: :target_to_english, article: article}), do: article.target_text
-  defp source_text(%{direction: :english_to_target, article: article}), do: article.english_text
-
-  defp answer_text(%{direction: :target_to_english, article: article}), do: article.english_text
-  defp answer_text(%{direction: :english_to_target, article: article}), do: article.target_text
-
-  defp source_label(%{direction: :target_to_english, article: article}),
-    do: language_name(article.language)
-
-  defp source_label(%{direction: :english_to_target}), do: "English"
-
-  defp answer_label(%{direction: :target_to_english}), do: "English"
-
-  defp answer_label(%{direction: :english_to_target, article: article}),
-    do: language_name(article.language)
 end

@@ -419,6 +419,26 @@ defmodule BidirectionalTranslationsWeb.CoreComponents do
   end
 
   @doc """
+  Renders a centered empty state with a message and optional action.
+
+  ## Examples
+
+      <.empty_state>
+        <p>No articles yet.</p>
+        <.link navigate={~p"/articles/new"}>Add one</.link>
+      </.empty_state>
+  """
+  slot :inner_block, required: true
+
+  def empty_state(assigns) do
+    ~H"""
+    <div class="text-center py-12 text-base-content/60">
+      {render_slot(@inner_block)}
+    </div>
+    """
+  end
+
+  @doc """
   Renders a [Heroicon](https://heroicons.com).
 
   Heroicons come in three styles – outline, solid, and mini.

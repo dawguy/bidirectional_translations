@@ -26,6 +26,7 @@ erl_crash.dump
 bidirectional_translations-*.tar
 
 .env
+.bk.env
 
 # Ignore assets that are produced by build tools.
 /priv/static/assets/

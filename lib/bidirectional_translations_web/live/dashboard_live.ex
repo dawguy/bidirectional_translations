@@ -60,46 +60,40 @@ defmodule BidirectionalTranslationsWeb.DashboardLive do
 
         <section>
           <h2 class="text-lg font-semibold mb-3">Due Now</h2>
-          <div :if={@due_sessions == []} class="text-base-content/60 py-4">
+          <.empty_state :if={@due_sessions == []}>
             You're all caught up — nothing due today.
-          </div>
-          <div class="space-y-3">
-            <div :for={session <- @due_sessions} class="card bg-base-200 shadow-sm">
-              <div class="card-body p-4 gap-2">
-                <div class="flex items-start justify-between gap-4">
-                  <div class="min-w-0">
-                    <div class="flex items-center gap-2 mb-1 flex-wrap">
-                      <h3 class="font-semibold truncate">{session.article.title}</h3>
-                      <span
-                        :if={overdue?(session, @today)}
-                        class="badge badge-error badge-sm shrink-0"
-                      >
-                        Overdue
-                      </span>
-                    </div>
-                    <div class="text-sm text-base-content/70 flex flex-wrap gap-x-3 gap-y-1">
-                      <span>{language_name(session.article.language)}</span>
-                      <span>{direction_label(session.direction, session.article.language)}</span>
-                      <span>Scheduled {session.scheduled_date}</span>
-                    </div>
-                  </div>
-                  <div class="flex gap-2 shrink-0">
-                    <.link
-                      navigate={~p"/sessions/#{session.id}/practice"}
-                      class="btn btn-primary btn-sm"
-                    >
-                      Start
-                    </.link>
-                    <button
-                      phx-click="postpone_open"
-                      phx-value-id={session.id}
-                      class="btn btn-ghost btn-sm"
-                    >
-                      Postpone
-                    </button>
-                  </div>
-                </div>
-
+          </.empty_state>
+          <div :if={@due_sessions != []} class="space-y-3">
+            <.session_card
+              :for={session <- @due_sessions}
+              session={session}
+              target_language={session.article.language}
+              variant="prominent"
+            >
+              <:status_badges>
+                <span
+                  :if={overdue?(session, @today)}
+                  class="badge badge-error badge-sm shrink-0"
+                >
+                  Overdue
+                </span>
+              </:status_badges>
+              <:actions>
+                <.link
+                  navigate={~p"/sessions/#{session.id}/practice"}
+                  class="btn btn-primary btn-sm"
+                >
+                  Start
+                </.link>
+                <button
+                  phx-click="postpone_open"
+                  phx-value-id={session.id}
+                  class="btn btn-ghost btn-sm"
+                >
+                  Postpone
+                </button>
+              </:actions>
+              <:expandable>
                 <div :if={@postponing_id == session.id} class="pt-3 border-t border-base-300">
                   <form phx-submit="postpone_submit" class="flex flex-wrap items-center gap-3">
                     <input type="hidden" name="session_id" value={session.id} />
@@ -117,31 +111,15 @@ defmodule BidirectionalTranslationsWeb.DashboardLive do
                     </button>
                   </form>
                 </div>
-              </div>
-            </div>
+              </:expandable>
+            </.session_card>
           </div>
         </section>
 
         <section :if={@upcoming_sessions != []}>
           <h2 class="text-lg font-semibold mb-3">Coming Up</h2>
           <div class="space-y-2">
-            <div
-              :for={session <- @upcoming_sessions}
-              class="card bg-base-100 border border-base-300"
-            >
-              <div class="card-body p-4 py-3">
-                <div class="flex items-center justify-between gap-4">
-                  <div class="min-w-0">
-                    <span class="font-medium truncate">{session.article.title}</span>
-                    <div class="text-sm text-base-content/70 flex flex-wrap gap-x-3 mt-0.5">
-                      <span>{language_name(session.article.language)}</span>
-                      <span>{direction_label(session.direction, session.article.language)}</span>
-                      <span>{session.scheduled_date}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <.session_compact_card :for={session <- @upcoming_sessions} session={session} />
           </div>
         </section>
       </div>

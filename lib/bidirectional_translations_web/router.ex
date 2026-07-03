@@ -61,6 +61,9 @@ defmodule BidirectionalTranslationsWeb.Router do
       live "/articles/:id/edit", ArticleLive.Form, :edit
       live "/articles/:id", ArticleLive.Show, :show
       live "/sessions/:id/practice", SessionLive.Practice, :show
+      live "/library", LibraryLive.Index, :index
+      live "/library/new", LibraryLive.Form, :new
+      live "/library/:id/edit", LibraryLive.Form, :edit
     end
 
     post "/users/update-password", UserSessionController, :update_password

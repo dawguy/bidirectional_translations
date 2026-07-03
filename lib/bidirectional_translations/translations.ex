@@ -27,12 +27,26 @@ defmodule BidirectionalTranslations.Translations do
     |> Repo.all()
   end
 
-  def list_articles_with_sessions(%Scope{} = scope) do
+  @per_page 20
+
+  def list_articles_with_sessions(%Scope{} = scope, page \\ 1) do
     Article
     |> where(user_id: ^scope.user.id)
     |> order_by(desc: :inserted_at)
     |> preload(:sessions)
+    |> limit(^@per_page)
+    |> offset(^(@per_page * (page - 1)))
     |> Repo.all()
+  end
+
+  @doc """
+  Returns the total count of articles for a user. Used to determine if there
+  are more pages to load.
+  """
+  def count_articles(%Scope{} = scope) do
+    Article
+    |> where(user_id: ^scope.user.id)
+    |> Repo.aggregate(:count)
   end
 
   def get_article!(%Scope{} = scope, id) do
@@ -68,16 +82,21 @@ defmodule BidirectionalTranslations.Translations do
   end
 
   def update_article(%Scope{} = scope, %Article{} = article, attrs) do
-    true = article.user_id == scope.user.id
-
-    article
-    |> Article.changeset(attrs)
-    |> Repo.update()
+    if article.user_id != scope.user.id do
+      {:error, :unauthorized}
+    else
+      article
+      |> Article.changeset(attrs)
+      |> Repo.update()
+    end
   end
 
   def delete_article(%Scope{} = scope, %Article{} = article) do
-    true = article.user_id == scope.user.id
-    Repo.delete(article)
+    if article.user_id != scope.user.id do
+      {:error, :unauthorized}
+    else
+      Repo.delete(article)
+    end
   end
 
   def change_article(%Article{} = article, attrs \\ %{}) do
@@ -196,11 +215,12 @@ defmodule BidirectionalTranslations.Translations do
   """
   def upsert_attempt(%Session{} = session, body) do
     now = DateTime.utc_now(:second)
+    trimmed = String.trim(body)
 
     %Attempt{}
-    |> Attempt.changeset(%{body: body, session_id: session.id})
+    |> Attempt.changeset(%{body: trimmed, session_id: session.id})
     |> Repo.insert(
-      on_conflict: [set: [body: body, updated_at: now]],
+      on_conflict: [set: [body: trimmed, updated_at: now]],
       conflict_target: [:session_id]
     )
   end

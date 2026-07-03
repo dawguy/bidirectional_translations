@@ -82,6 +82,9 @@ defmodule BidirectionalTranslationsWeb.ArticleLive.Form do
          |> put_flash(:info, "Article updated.")
          |> push_navigate(to: ~p"/articles/#{article}")}
 
+      {:error, :unauthorized} ->
+        {:noreply, put_flash(socket, :error, "You are not authorized to edit this article.")}
+
       {:error, changeset} ->
         {:noreply, assign(socket, :form, to_form(changeset))}
     end
@@ -94,49 +97,15 @@ defmodule BidirectionalTranslationsWeb.ArticleLive.Form do
       <div class="space-y-6">
         <h1 class="text-2xl font-bold">{@page_title}</h1>
 
-        <.form for={@form} phx-change="validate" phx-submit="save" class="space-y-4" id="article-form" phx-hook=".RememberLanguage">
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="md:col-span-2">
-              <.input field={@form[:title]} label="Title" placeholder="Article title" />
-            </div>
-            <.input
-              field={@form[:language]}
-              type="select"
-              label="Target Language"
-              options={@language_options}
-              prompt="Select a language"
-            />
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <.input
-              field={@form[:source_url]}
-              label="Source URL (optional)"
-              placeholder="https://..."
-            />
-            <.input
-              field={@form[:reader_url]}
-              label="Reader URL (optional)"
-              placeholder="https://www.lingq.com/... or https://kimchi-reader.app/..."
-            />
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <.input
-              field={@form[:english_text]}
-              type="textarea"
-              label="English Text"
-              rows="18"
-              placeholder="Paste the English version here..."
-            />
-            <.input
-              field={@form[:target_text]}
-              type="textarea"
-              label="Target Language Text"
-              rows="18"
-              placeholder="Paste the target language version here..."
-            />
-          </div>
+        <.form
+          for={@form}
+          phx-change="validate"
+          phx-submit="save"
+          class="space-y-4"
+          id="article-form"
+          phx-hook=".RememberLanguage"
+        >
+          <.article_form_fields form={@form} language_options={@language_options} />
 
           <div class="flex gap-3 pt-2">
             <.button type="submit" variant="primary" phx-disable-with="Saving...">
@@ -153,7 +122,12 @@ defmodule BidirectionalTranslationsWeb.ArticleLive.Form do
       </div>
     </Layouts.app>
 
-    <script :type={Phoenix.LiveView.ColocatedHook} name=".RememberLanguage" id="remember-language-hook" phx-update="ignore">
+    <script
+      :type={Phoenix.LiveView.ColocatedHook}
+      name=".RememberLanguage"
+      id="remember-language-hook"
+      phx-update="ignore"
+    >
       export default {
         mounted() {
           // Restore last selected language

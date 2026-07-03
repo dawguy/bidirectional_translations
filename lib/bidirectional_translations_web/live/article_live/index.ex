@@ -3,25 +3,52 @@ defmodule BidirectionalTranslationsWeb.ArticleLive.Index do
 
   alias BidirectionalTranslations.Translations
 
+  @per_page 20
+
   @impl true
   def mount(_params, _session, socket) do
+    scope = socket.assigns.current_scope
+
     {:ok,
      socket
      |> assign(:page_title, "Articles")
-     |> assign(:articles, Translations.list_articles_with_sessions(socket.assigns.current_scope))
+     |> assign(:articles, Translations.list_articles_with_sessions(scope, 1))
+     |> assign(:page, 1)
+     |> assign(:has_more, Translations.count_articles(scope) > @per_page)
      |> assign(:deleting_id, nil)}
   end
 
   @impl true
-  def handle_event("delete", %{"id" => id}, socket) do
-    article = Translations.get_article!(socket.assigns.current_scope, id)
-    {:ok, _} = Translations.delete_article(socket.assigns.current_scope, article)
+  def handle_event("load_more", _params, socket) do
+    scope = socket.assigns.current_scope
+    next_page = socket.assigns.page + 1
+    new_articles = Translations.list_articles_with_sessions(scope, next_page)
 
     {:noreply,
      socket
-     |> put_flash(:info, "Article deleted.")
-     |> assign(:deleting_id, nil)
-     |> assign(:articles, Translations.list_articles_with_sessions(socket.assigns.current_scope))}
+     |> assign(:articles, socket.assigns.articles ++ new_articles)
+     |> assign(:page, next_page)
+     |> assign(:has_more, Translations.count_articles(scope) > next_page * @per_page)}
+  end
+
+  def handle_event("delete", %{"id" => id}, socket) do
+    article = Translations.get_article!(socket.assigns.current_scope, id)
+
+    case Translations.delete_article(socket.assigns.current_scope, article) do
+      {:ok, _} ->
+        scope = socket.assigns.current_scope
+
+        {:noreply,
+         socket
+         |> put_flash(:info, "Article deleted.")
+         |> assign(:deleting_id, nil)
+         |> assign(:articles, Translations.list_articles_with_sessions(scope, 1))
+         |> assign(:page, 1)
+         |> assign(:has_more, Translations.count_articles(scope) > @per_page)}
+
+      {:error, _} ->
+        {:noreply, put_flash(socket, :error, "Could not delete article.")}
+    end
   end
 
   def handle_event("open_delete_confirm", %{"id" => id}, socket) do
@@ -44,10 +71,10 @@ defmodule BidirectionalTranslationsWeb.ArticleLive.Index do
           </.link>
         </div>
 
-        <div :if={@articles == []} class="text-center py-12 text-base-content/60">
+        <.empty_state :if={@articles == []}>
           <p>No articles yet.</p>
           <p class="mt-1">Add your first article to get started.</p>
-        </div>
+        </.empty_state>
 
         <div class="space-y-3">
           <div :for={article <- @articles} class="card bg-base-200 shadow-sm">
@@ -84,8 +111,8 @@ defmodule BidirectionalTranslationsWeb.ArticleLive.Index do
               <%!-- Inline delete confirmation --%>
               <div :if={@deleting_id == article.id} class="mt-4 pt-4 border-t border-base-300">
                 <p class="text-sm mb-3">
-                  Delete <strong>{article.title}</strong> and all its practice sessions?
-                  <br class="hidden sm:inline" />
+                  Delete <strong>{article.title}</strong>
+                  and all its practice sessions? <br class="hidden sm:inline" />
                   <span class="text-error">This cannot be undone.</span>
                 </p>
                 <div class="flex gap-2">
@@ -99,6 +126,12 @@ defmodule BidirectionalTranslationsWeb.ArticleLive.Index do
               </div>
             </div>
           </div>
+        </div>
+
+        <div :if={@has_more} class="text-center pt-2">
+          <button phx-click="load_more" class="btn btn-ghost btn-sm">
+            Load more articles
+          </button>
         </div>
       </div>
     </Layouts.app>
